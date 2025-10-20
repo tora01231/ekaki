@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YurufuwaCider - Ashen One's Portfolio</title>
-    <!-- Tailwind CSSのロード -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Interフォントを使用 (Tailwindデフォルト) -->
-    <style>
+    <!-- Tailwind CSSのロード --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- Interフォントを使用 (Tailwindデフォルト) --><style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
         body {
             font-family: 'Inter', sans-serif;
@@ -37,65 +35,47 @@
         .icon-flame {
             color: #d97706; /* amber-600 */
         }
-
-        /* Canvas スタイル */
-        #drawing-canvas {
-            cursor: crosshair;
-            border: 2px solid #3d3d3d;
-            background-color: #1a1a1a;
-            /* レスポンシブ対応のための幅設定 */
-            max-width: 100%;
-        }
     </style>
 </head>
 
 <body class="text-gray-200 min-h-screen flex flex-col">
 
-    <!-- サイトヘッダー (ステータスバー風) -->
-    <header class="bg-black/70 p-4 border-b-4 border-amber-600 shadow-xl fixed w-full z-10">
+    <!-- サイトヘッダー (ステータスバー風) --><header class="bg-black/70 p-4 border-b-4 border-amber-600 shadow-xl fixed w-full z-10">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <!-- HPゲージ風要素 -->
-            <div class="flex items-center space-x-4">
+            <!-- HPゲージ風要素 --><div class="flex items-center space-x-4">
                 <span class="text-xl font-bold text-amber-500 uppercase tracking-widest">
                     賢者の手記
                 </span>
                 <div class="w-48 h-4 bg-gray-700 border border-gray-500 rounded-sm">
-                    <!-- HP満タンの表現 -->
-                    <div class="h-full bg-red-700 rounded-sm" style="width: 100%;"></div>
+                    <!-- HP満タンの表現 --><div class="h-full bg-red-700 rounded-sm" style="width: 100%;"></div>
                 </div>
                 <span id="user-id-display" class="text-xs text-gray-400"></span>
             </div>
 
-            <!-- ナビゲーション (選択されたページが燃えるような色に) -->
-            <nav id="nav-menu" class="flex space-x-6 text-sm font-semibold uppercase">
-                <!-- ナビゲーションボタンはJSで制御 -->
-                <button data-page="home" class="nav-btn transition-colors duration-200 hover:text-red-600 focus:outline-none focus:text-red-700">篝火</button>
+            <!-- ナビゲーション (選択されたページが燃えるような色に) --><nav id="nav-menu" class="flex space-x-6 text-sm font-semibold uppercase">
+                <!-- 「古文書」ページを削除 --><button data-page="home" class="nav-btn transition-colors duration-200 hover:text-red-600 focus:outline-none focus:text-red-700">篝火</button>
                 <button data-page="profile" class="nav-btn transition-colors duration-200 hover:text-red-600 focus:outline-none focus:text-red-700">誓約</button>
                 <button data-page="works" class="nav-btn transition-colors duration-200 hover:text-red-600 focus:outline-none focus:text-red-700">遺物</button>
-                <button data-page="manuscript" class="nav-btn transition-colors duration-200 hover:text-red-600 focus:outline-none focus:text-red-700">古文書</button>
+                <button data-page="phantoms" class="nav-btn transition-colors duration-200 hover:text-red-600 focus:outline-none focus:text-red-700">幻影</button>
             </nav>
         </div>
     </header>
 
-    <!-- メインコンテンツエリア -->
-    <main id="main-content" class="flex-grow pt-28 pb-10 flex justify-center items-start">
-        <!-- コンテンツがここに挿入される -->
-        <p class="text-gray-500">
+    <!-- メインコンテンツエリア --><main id="main-content" class="flex-grow pt-28 pb-10 flex justify-center items-start">
+        <!-- コンテンツがここに挿入される --><p class="text-gray-500">
             
         </p>
     </main>
 
-    <!-- フッター (石板のフッター風) -->
-    <footer class="bg-black/70 p-4 text-center text-xs text-gray-500 border-t-2 border-gray-800">
+    <!-- フッター (石板のフッター風) --><footer class="bg-black/70 p-4 text-center text-xs text-gray-500 border-t-2 border-gray-800">
         <p>&copy; 2025 Ashen One's Chronicle. All rights reserved. 闇に踏み入り、探求せよ。</p>
     </footer>
 
-    <!-- Firebase SDKのインポート -->
-    <script type="module">
+    <!-- Firebase SDKのインポート --><script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        
+        // Firestore関連のインポートはすべて削除
+
         // =======================================================
         // GitHub Pages/ローカル実行対応のためのグローバル変数定義
         // =======================================================
@@ -106,14 +86,14 @@
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Firebase初期化に必要な変数
-        let app, db, auth;
+        let app, auth; // db変数を削除
         let userId = null;
         let isAuthReady = false;
         
         // Firebase設定が存在する場合のみ初期化を実行
         if (Object.keys(firebaseConfig).length > 0) {
             app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
+            // dbの初期化を削除
             auth = getAuth(app);
 
             // 認証処理
@@ -145,7 +125,7 @@
             });
         } else {
             // Firebase設定がない場合の警告と静的モードでの動作
-            console.warn("GitHub Pages/ローカル実行モード: Firebase設定が存在しないため、データの永続化機能（古文書）は無効です。Firestoreを使用するには、`firebaseConfig`オブジェクトを実際の値で定義してください。");
+            console.warn("GitHub Pages/ローカル実行モード: Firebase設定が存在しないため、認証情報が表示されますが機能しません。");
             
             // 静的モードとして動作させる
             isAuthReady = true;
@@ -153,18 +133,29 @@
             window.dispatchEvent(new Event('auth-ready'));
         }
 
+        // =======================================================
+        // FIREBASE / FIRESTORE 関連関数 (すべて削除)
+        // =======================================================
 
-        // Canvas描画のためのグローバル変数 (既存のSPAスコープからこちらへ移動)
-        let canvas, ctx;
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
-        let lineColor = '#d97706'; 
-        let lineWidth = 5;
-        let saveTimeout = null;
-        let drawingData = null; // Base64データを保持
+        // Canvas描画のためのグローバル変数 (すべて削除)
+        // Canvas描画ロジック (すべて削除)
 
-        // ページコンテンツのテンプレート
+        // =======================================================
+        // ★ 画像URLの定義 (ここを編集して画像を差し替えます) ★
+        // =======================================================
+        const imageUrls = {
+            // メインの横長画像 (1200x400)
+            main: "https://i.imgur.com/8hnrD9J.jpeg",
+            // RTAゴールの正方形画像 (400x400)
+            rta: "https://i.imgur.com/XwtuXuq.jpeg",
+            // 篝火（休息地）の正方形画像 (400x400)
+            bonfire: "https://i.imgur.com/N9LPrk3.jpeg",
+            // CS2クラッチモーメントの正方形画像 (400x400)
+            cs: "https://i.imgur.com/WX8ftVE.jpeg",
+        };
+
+
+        // ページコンテンツのテンプレート (「manuscript」を削除)
         const pages = {
             home: `
                 <div class="ds-container w-full max-w-4xl p-10 mt-10 rounded-lg text-center">
@@ -175,9 +166,8 @@
                         名もなき者よ、ようこそ。この地は、私の成し遂げた偉業の記録。
                     </h2>
                     <p class="text-lg text-gray-300 leading-relaxed">
-                        古き誓約の記録を閲覧するには「誓約」、闇に魅入られた戦場を辿るには「遺物」、そして失われた記憶を呼び覚ますには「古文書」を選べ。
-                        <br class="my-4">
-                        
+                        古き誓約の記録を閲覧するには「誓約」、闇に魅入られた戦場を辿るには「遺物」を選べ。
+                        そして、過去の記憶の残滓を追体験するには「幻影」を選べ。
                     </p>
                     <button onclick="window.changePage('profile')" class="mt-8 ds-button text-lg bg-gray-800 text-amber-500 py-3 px-8 rounded-md uppercase font-bold tracking-widest">
                         旅を始める
@@ -191,8 +181,7 @@
                     </h1>
                     
                     <div class="grid md:grid-cols-2 gap-8">
-                        <!-- 基本情報 (ステータス) -->
-                        <div>
+                        <!-- 基本情報 (ステータス) --><div>
                             <h2 class="text-2xl font-bold text-amber-500 mb-4">基本情報 (Status)</h2>
                             <dl class="space-y-3 text-left">
                                 <div class="flex justify-between border-b border-gray-800 pb-1">
@@ -214,32 +203,25 @@
                             </dl>
                         </div>
 
-                        <!-- ネットワークID (オンラインプレイ) -->
-                        <div>
+                        <!-- ネットワークID (オンラインプレイ) --><div>
                             <h2 class="text-2xl font-bold text-amber-500 mb-4">オンラインプレイ</h2>
                             <div class="space-y-4">
-                                <!-- Discord -->
-                                <div class="bg-zinc-800 p-4 rounded-md border border-gray-700 flex items-center shadow-lg">
-                                    <span class="text-3xl mr-4 icon-flame">&#x2717;</span> <!-- Custom Cross Icon -->
-                                    <div>
+                                <!-- Discord --><div class="bg-zinc-800 p-4 rounded-md border border-gray-700 flex items-center shadow-lg">
+                                    <span class="text-3xl mr-4 icon-flame">&#x2717;</span> <!-- Custom Cross Icon --><div>
                                         <p class="text-gray-400 text-sm">Discord ID (誓約の合図)</p>
                                         <p class="text-xl font-mono text-gray-100 break-all">no.ten</p>
                                     </div>
                                 </div>
                                 
-                                <!-- Steam -->
-                                <div class="bg-zinc-800 p-4 rounded-md border border-gray-700 flex items-center shadow-lg">
-                                    <span class="text-3xl mr-4 icon-flame">&#x2717;</span> <!-- Custom Cross Icon -->
-                                    <div>
+                                <!-- Steam --><div class="bg-zinc-800 p-4 rounded-md border border-gray-700 flex items-center shadow-lg">
+                                    <span class="text-3xl mr-4 icon-flame">&#x2717;</span> <!-- Custom Cross Icon --><div>
                                         <p class="text-gray-400 text-sm">Steam Profile (異世界の旅人)</p>
                                         <p class="text-xl font-mono text-gray-100 break-all">YurufuwaCider</p>
                                     </div>
                                 </div>
                                 
-                                <!-- YouTube (古文書庫) -->
-                                <div class="bg-zinc-800 p-4 rounded-md border border-gray-700 flex items-center shadow-lg">
-                                    <span class="text-3xl mr-4 icon-flame">&#x2717;</span> <!-- Custom Cross Icon -->
-                                    <div>
+                                <!-- YouTube (古文書庫) --><div class="bg-zinc-800 p-4 rounded-md border border-gray-700 flex items-center shadow-lg">
+                                    <span class="text-3xl mr-4 icon-flame">&#x2717;</span> <!-- Custom Cross Icon --><div>
                                         <p class="text-gray-400 text-sm">Youtube (古文書庫)</p>
                                         <p class="text-xl font-mono text-gray-100 break-all">@kibun_shidai</p>
                                     </div>
@@ -260,8 +242,7 @@
                     </h1>
                     
                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <!-- 作品カード 1 -->
-                        <div class="bg-zinc-800 p-6 rounded-lg border-2 border-gray-700 hover:border-amber-600 transition-all duration-300 shadow-xl">
+                        <!-- 作品カード 1 --><div class="bg-zinc-800 p-6 rounded-lg border-2 border-gray-700 hover:border-amber-600 transition-all duration-300 shadow-xl">
                             <h3 class="text-xl font-bold text-amber-500 mb-2 uppercase">Counter-Strike2</h3>
                             <p class="text-sm text-gray-400 mb-4">[FPS]</p>
                             <p class="text-gray-300 text-sm">
@@ -273,8 +254,7 @@
                             
                         </div>
 
-                        <!-- 作品カード 2 -->
-                        <div class="bg-zinc-800 p-6 rounded-lg border-2 border-gray-700 hover:border-amber-600 transition-all duration-300 shadow-xl">
+                        <!-- 作品カード 2 --><div class="bg-zinc-800 p-6 rounded-lg border-2 border-gray-700 hover:border-amber-600 transition-all duration-300 shadow-xl">
                             <h3 class="text-xl font-bold text-amber-500 mb-2 uppercase">DarkSouls</h3>
                             <p class="text-sm text-gray-400 mb-4">[ActionRPG]</p>
                             <p class="text-gray-300 text-sm">
@@ -286,8 +266,7 @@
                             
                         </div>
 
-                        <!-- 作品カード 3 -->
-                        <div class="bg-zinc-800 p-6 rounded-lg border-2 border-gray-700 hover:border-amber-600 transition-all duration-300 shadow-xl">
+                        <!-- 作品カード 3 --><div class="bg-zinc-800 p-6 rounded-lg border-2 border-gray-700 hover:border-amber-600 transition-all duration-300 shadow-xl">
                             <h3 class="text-xl font-bold text-amber-500 mb-2 uppercase">skate.</h3>
                             <p class="text-sm text-gray-400 mb-4">[Action]</p>
                             <p class="text-gray-300 text-sm">
@@ -308,306 +287,41 @@
                     </div>
                 </div>
             `,
-            manuscript: `
-                <div class="ds-container w-full max-w-4xl p-10 mt-10 rounded-lg">
-                    <h1 class="text-4xl font-bold text-amber-500 mb-6 border-b-2 border-gray-700 pb-3 uppercase text-center">
-                        古文書 - 失われた記憶の断片
-                    </h1>
-                    <p class="text-sm text-gray-400 mb-6 text-center">
-                        この古文書に、あなたの記憶の断片を描き残せ。描いた内容は自動で永続保存されます。
-                    </p>
-                    
-                    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4 justify-center items-center">
-                        <label for="color-picker" class="text-gray-400 font-semibold">筆の色:</label>
-                        <input type="color" id="color-picker" value="#d97706" class="rounded border-2 border-gray-700 h-8 w-12">
-                        
-                        <label for="line-width" class="text-gray-400 font-semibold">筆の太さ:</label>
-                        <input type="range" id="line-width" min="1" max="50" value="5" class="w-24">
-                        <span id="width-display" class="text-amber-500 font-mono w-8 text-right">5</span>
-                        
-                        <button onclick="window.clearCanvas(true)" class="ds-button bg-red-800 text-gray-100 py-2 px-4 rounded-md uppercase font-bold text-sm tracking-wide hover:bg-red-900">
-                            記憶を消す (Clear)
-                        </button>
-                    </div>
+            phantoms: `
+                <div class="ds-container w-full max-w-6xl p-10 mt-10 rounded-lg">
+                    <!-- 画像URLを外部変数から取得するよう修正 -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- 画像 1: ボス戦の瞬間 (横長 - モバイルで全幅、デスクトップで3カラムスパン) --><div class="sm:col-span-2 lg:col-span-3 bg-zinc-800 p-3 rounded-lg border-2 border-gray-700 shadow-xl overflow-hidden">
+                            <img src="${imageUrls.main}" 
+                                alt="Placeholder image of a dramatic boss fight scene" 
+                                class="w-full h-auto rounded-md object-cover transition duration-300 transform hover:scale-[1.01] hover:shadow-2xl"/>
+                        </div>
 
-                    <canvas id="drawing-canvas" width="800" height="500" class="mx-auto rounded-lg shadow-2xl"></canvas>
-                    
-                    <p class="mt-6 text-center text-gray-500 italic text-sm" id="save-status">
-                        記憶は永続的に残されます。
-                    </p>
+                        <!-- 画像 2: RTAゴール (正方形) --><div class="bg-zinc-800 p-4 rounded-lg border-2 border-gray-700 shadow-xl">
+                            <!-- 修正: URLを直接貼り付ける代わりに、変数参照を使用するように変更 -->
+                            <img src="${imageUrls.rta}" 
+                                alt="Placeholder image of RTA finish screen" 
+                                class="w-full h-auto rounded-md object-cover transition duration-300 transform hover:scale-[1.05]"/>
+                        </div>
+
+                        <!-- 画像 3: 拠点（篝火）の風景 (正方形) --><div class="bg-zinc-800 p-4 rounded-lg border-2 border-gray-700 shadow-xl">
+                            <img src="${imageUrls.bonfire}" 
+                                alt="Placeholder image of a peaceful bonfire" 
+                                class="w-full h-auto rounded-md object-cover transition duration-300 transform hover:scale-[1.05]"/>
+                        </div>
+                        
+                        <!-- 画像 4: プレイスタイル (正方形) --><div class="bg-zinc-800 p-4 rounded-lg border-2 border-gray-700 shadow-xl">
+                            <img src="${imageUrls.cs}" 
+                                alt="Placeholder image of Counter-Strike 2 clutch moment" 
+                                class="w-full h-auto rounded-md object-cover transition duration-300 transform hover:scale-[1.05]"/>
+                        </div>
+                    </div>
                 </div>
             `,
         };
 
         // =======================================================
-        // FIREBASE / FIRESTORE 関連関数
-        // =======================================================
-
-        /**
-         * 描画データをFirestoreに保存する。
-         */
-        async function saveDrawingToFirestore() {
-            // Firebaseが初期化されていない場合は処理をスキップ
-            if (!isAuthReady || !userId || !canvas || !db) return;
-            
-            try {
-                // キャンバスの内容をBase64形式で取得
-                const dataURL = canvas.toDataURL('image/png');
-                drawingData = dataURL; // グローバル変数も更新
-                
-                // FirestoreのパスをアプリIDとユーザーIDに基づいて構築
-                const docRef = doc(db, `artifacts/${appId}/users/${userId}/drawing_data/manuscript`);
-                await setDoc(docRef, { 
-                    dataURL: dataURL,
-                    timestamp: new Date().getTime()
-                });
-
-                const statusEl = document.getElementById('save-status');
-                if (statusEl) {
-                    statusEl.textContent = '記憶は永続的に残されます。 (保存完了)';
-                    statusEl.classList.remove('text-red-500');
-                    statusEl.classList.add('text-green-500');
-                    setTimeout(() => {
-                        statusEl.textContent = '記憶は永続的に残されます。';
-                        statusEl.classList.remove('text-green-500');
-                    }, 2000);
-                }
-                
-            } catch (e) {
-                console.error("Error saving document: ", e);
-                const statusEl = document.getElementById('save-status');
-                if (statusEl) {
-                    statusEl.textContent = '保存中にエラーが発生しました。';
-                    statusEl.classList.add('text-red-500');
-                }
-            }
-        }
-
-        /**
-         * Firestoreから描画データをロードする。
-         */
-        async function loadDrawingFromFirestore() {
-            // Firebaseが初期化されていない場合は処理をスキップ
-            if (!isAuthReady || !userId || !db) return;
-
-            try {
-                const docRef = doc(db, `artifacts/${appId}/users/${userId}/drawing_data/manuscript`);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.dataURL) {
-                        drawingData = data.dataURL;
-                        console.log("Drawing data loaded from Firestore.");
-                        return true;
-                    }
-                }
-                drawingData = null; // データがない場合
-                return false;
-            } catch (e) {
-                console.error("Error loading document: ", e);
-                drawingData = null;
-                return false;
-            }
-        }
-        
-        /**
-         * Firestoreから描画データを削除する (キャンバスクリア時)
-         */
-        async function deleteDrawingFromFirestore() {
-            // Firebaseが初期化されていない場合は処理をスキップ
-            if (!isAuthReady || !userId || !db) return;
-            
-            try {
-                const docRef = doc(db, `artifacts/${appId}/users/${userId}/drawing_data/manuscript`);
-                await deleteDoc(docRef);
-                console.log("Drawing data deleted from Firestore.");
-            } catch (e) {
-                console.error("Error deleting document: ", e);
-            }
-        }
-
-        // =======================================================
-        // CANVAS 描画ロジック (変更なし)
-        // =======================================================
-
-        /**
-         * 描画キャンバスをセットアップする
-         */
-        async function setupCanvas() {
-            canvas = document.getElementById('drawing-canvas');
-            if (!canvas) return; 
-
-            ctx = canvas.getContext('2d');
-            
-            // ロードが完了するのを待つ
-            await loadDrawingFromFirestore();
-
-            // Retina/高解像度ディスプレイ対応 & レスポンシブ対応
-            function resizeCanvas() {
-                const container = canvas.closest('.ds-container');
-                // コンテナの幅からパディングを引いた値を算出
-                const containerWidth = container ? container.clientWidth - 80 : 800;
-                
-                const ratio = window.devicePixelRatio || 1;
-                canvas.width = containerWidth * ratio;
-                canvas.height = 500 * ratio; 
-                canvas.style.width = `${containerWidth}px`;
-                canvas.style.height = `500px`;
-                
-                // 描画コンテキストをスケーリング
-                ctx.scale(ratio, ratio);
-                
-                // 描画設定をリセット
-                ctx.strokeStyle = lineColor;
-                ctx.lineWidth = lineWidth;
-                ctx.lineJoin = 'round';
-                ctx.lineCap = 'round';
-                
-                // リサイズ後、保存された描画内容をロード
-                loadDrawing();
-            }
-            
-            // 描画をグローバル変数からロードし、キャンバスに描画する関数
-            function loadDrawing() {
-                // 背景をクリアしてダークカラーにする
-                ctx.clearRect(0, 0, canvas.width, canvas.height); 
-                ctx.save();
-                ctx.fillStyle = '#1a1a1a';
-                ctx.fillRect(0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
-                ctx.restore();
-                
-                if (drawingData) {
-                    const img = new Image();
-                    img.onload = () => {
-                        // 描画をキャンバスにフィットさせる
-                        ctx.drawImage(img, 0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
-                    };
-                    img.src = drawingData;
-                }
-            }
-            
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-
-
-            // 描画イベントリスナー
-            canvas.addEventListener('mousedown', (e) => startDrawing(e, false));
-            canvas.addEventListener('touchstart', (e) => startDrawing(e, true));
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('touchmove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('touchend', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
-            canvas.addEventListener('touchcancel', stopDrawing);
-            
-            // カラーピッカーと太さの制御
-            const colorPicker = document.getElementById('color-picker');
-            const lineWidthInput = document.getElementById('line-width');
-            const widthDisplay = document.getElementById('width-display');
-            
-            if (colorPicker) colorPicker.addEventListener('input', (e) => {
-                lineColor = e.target.value;
-                ctx.strokeStyle = lineColor;
-            });
-            
-            if (lineWidthInput) lineWidthInput.addEventListener('input', (e) => {
-                lineWidth = parseInt(e.target.value);
-                ctx.lineWidth = lineWidth;
-                if (widthDisplay) widthDisplay.textContent = lineWidth;
-            });
-        }
-        
-        /**
-         * 描画開始処理
-         */
-        function startDrawing(e, isTouch) {
-            isDrawing = true;
-            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-            [lastX, lastY] = getCanvasCoordinates(clientX, clientY);
-            e.preventDefault(); 
-        }
-
-        /**
-         * 描画終了処理 - 保存をトリガー
-         */
-        function stopDrawing() {
-            if (!isDrawing) return;
-            isDrawing = false;
-            // 描画終了時に即時保存
-            if (saveTimeout) clearTimeout(saveTimeout);
-            saveDrawingToFirestore();
-        }
-
-        /**
-         * 描画処理
-         */
-        function draw(e) {
-            if (!isDrawing) return;
-
-            const isTouch = e.type.includes('touch');
-            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-
-            const [currentX, currentY] = getCanvasCoordinates(clientX, clientY);
-
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(currentX, currentY);
-            ctx.stroke();
-            
-            [lastX, lastY] = [currentX, currentY];
-            e.preventDefault(); 
-            
-            // 描画中に間隔を空けて保存をスケジュール (頻繁なFirestore書き込みを防ぐ)
-            if (saveTimeout) clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(saveDrawingToFirestore, 1000); // 1秒ごとに保存を試みる
-        }
-        
-        /**
-         * 画面座標をキャンバス内の座標に変換する
-         */
-        function getCanvasCoordinates(clientX, clientY) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            return [
-                (clientX - rect.left) * scaleX / (window.devicePixelRatio || 1),
-                (clientY - rect.top) * scaleY / (window.devicePixelRatio || 1)
-            ];
-        }
-
-        /**
-         * キャンバスをクリアし、Firestoreのデータを削除する
-         * @param {boolean} clearGlobalData - グローバルな描画データもクリアするかどうか
-         */
-        window.clearCanvas = function(clearGlobalData = true) {
-            if (!ctx) return;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height); 
-            
-            // 背景色を再設定
-            ctx.save();
-            ctx.fillStyle = '#1a1a1a'; 
-            ctx.fillRect(0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
-            ctx.restore();
-
-            if (clearGlobalData) {
-                drawingData = null;
-                // Firestoreが初期化されている場合のみ削除を試みる
-                if (db) {
-                    deleteDrawingFromFirestore(); // Firestoreから削除
-                    console.log('記憶は完全に消滅し、Firestoreからも削除されました。');
-                } else {
-                    console.log('記憶はローカルで消去されました。Firestoreは未設定です。');
-                }
-            }
-        }
-
-
-        // =======================================================
-        // SPA NAVIGATION (変更なし)
+        // SPA NAVIGATION
         // =======================================================
 
         const contentEl = document.getElementById('main-content');
@@ -616,17 +330,11 @@
 
         /**
          * ページ内容を切り替えて描画する
-         * @param {string} pageName - 描画するページのキー ('home', 'profile', 'works', 'manuscript')
+         * @param {string} pageName - 描画するページのキー ('home', 'profile', 'works', 'phantoms')
          */
         function renderPage(pageName) {
-            // === [ページ遷移前に現在の描画を保存する] ===
-            if (currentPage === 'manuscript' && canvas) {
-                // ページ離脱時に強制保存
-                if (saveTimeout) clearTimeout(saveTimeout);
-                saveDrawingToFirestore();
-            }
-            // ===============================================
-
+            // 描画機能がないため、ページ離脱時の保存処理は不要
+            
             const template = pages[pageName];
             if (template) {
                 contentEl.style.opacity = '0';
@@ -635,10 +343,7 @@
                     updateActiveNav(pageName);
                     currentPage = pageName;
                     
-                    // 「古文書」ページの場合のみキャンバスをセットアップ
-                    if (pageName === 'manuscript' && isAuthReady) {
-                        setupCanvas(); // 認証完了後にのみセットアップ
-                    }
+                    // 「古文書」関連のセットアップロジックはすべて削除
                     
                     contentEl.style.opacity = '1';
                 }, 300); 
@@ -687,7 +392,7 @@
             renderPage(initialPage);
         }
         
-        // 認証完了を待ってアプリを初期化
+        // 認証完了を待ってアプリを初期化 (Firebase設定がない場合は即時実行)
         if (isAuthReady) {
              startPortfolioApp();
         } else {
