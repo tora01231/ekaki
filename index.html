@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YurufuwaCider - Ashen One's Portfolio</title>
+    <!-- Tailwind CSSのロード -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Interフォントを使用 (Tailwindデフォルト) -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            /* 荒廃した石畳のような背景 */
+            background-color: #121212;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23232323' fill-opacity='0.6'%3E%3Cpath d='M36 34.721v1.161l-10 4.888v-1.161l10-4.888zm0 1.258v1.077l-10 4.793v-1.077l10-4.793zM5.584 41.564l4.908-1.284 3.447 13.111-4.908 1.284-3.447-13.111zm11.39 12.062l4.908-1.284 3.447 13.111-4.908 1.284-3.447-13.111zm-11.39-12.062l4.908-1.284 3.447 13.111-4.908 1.284-3.447-13.111zM1 39l2 11 11-2-2-11H1zm5-2.586l3.414 3.414L10.5 40l-.586-.586L6 35.828l3.414 3.414L10.5 40l-.586-.586z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        /* カスタムスタイル: ダークソウル風のボタン/枠線 */
+        .ds-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 0 0 #4a0404; /* 下の影（血のような赤） */
+            border: 2px solid #5d5d5d;
+        }
+        .ds-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 0 #5d0707;
+            background-color: #27272a; /* hover時の深みを出す */
+        }
+        .ds-container {
+            border: 4px solid #3d3d3d; /* 重厚な境界線 */
+            background-color: rgba(24, 24, 27, 0.95); /* bg-zinc-900 95%透明 */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* 影で浮き上がらせる */
+        }
+
+        /* アイコンの色を炎のような色にする */
+        .icon-flame {
+            color: #d97706; /* amber-600 */
+        }
+
+        /* Canvas スタイル */
+        #drawing-canvas {
+            cursor: crosshair;
+            border: 2px solid #3d3d3d;
+            background-color: #1a1a1a;
+            /* レスポンシブ対応のための幅設定 */
+            max-width: 100%;
+        }
+    </style>
+</head>
+
+<body class="text-gray-200 min-h-screen flex flex-col">
+
+    <!-- サイトヘッダー (ステータスバー風) -->
+    <header class="bg-black/70 p-4 border-b-4 border-amber-600 shadow-xl fixed w-full z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <!-- HPゲージ風要素 -->
+            <div class="flex items-center space-x-4">
+                <span class="text-xl font-bold text-amber-500 uppercase tracking-widest">
+                    賢者の手記
+                </span>
+                <div class="w-48 h-4 bg-gray-700 border border-gray-500 rounded-sm">
+                    <!-- HP満タンの表現 -->
+                    <div class="h-full bg-red-700 rounded-sm" style="width: 100%;"></div>
+                </div>
+                <span id="user-id-display" class="text-xs text-gray-400"></span>
+            </div>
+
+            <!-- ナビゲーション (選択されたページが燃えるような色に) -->
+            <nav id="nav-menu" class="flex space-x-6 text-sm font-semibold uppercase">
+                <!-- ナビゲーションボタンはJSで制御 -->
+                <button data-page="home" class="nav-btn transition-colors duration-200 hover:text-red-600 focus:outline-none focus:text-red-700">篝火</button>
+                <button data-page="profile" class="nav-btn transition-colors duration-200 hover:text-red-600 focus:outline-none focus:text-red-700">誓約</button>
+                <button data-page="works" class="nav-btn transition-colors duration-200 hover:text-red-600 focus:outline-none focus:text-red-700">遺物</button>
+                <button data-page="manuscript" class="nav-btn transition-colors duration-200 hover:text-red-600 focus:outline-none focus:text-red-700">古文書</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main id="main-content" class="flex-grow pt-28 pb-10 flex justify-center items-start">
+        <!-- コンテンツがここに挿入される -->
+        <p class="text-gray-500">
+            
+        </p>
+    </main>
+
+    <!-- フッター (石板のフッター風) -->
+    <footer class="bg-black/70 p-4 text-center text-xs text-gray-500 border-t-2 border-gray-800">
+        <p>&copy; 2025 Ashen One's Chronicle. All rights reserved. 闇に踏み入り、探求せよ。</p>
+    </footer>
+
+    <!-- Firebase SDKのインポート -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // グローバル変数の定義
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+        // Firebase初期化
+        let app, db, auth;
+        let userId = null;
+        let isAuthReady = false;
+        
+        if (Object.keys(firebaseConfig).length > 0) {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            // 認証処理
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                } else if (typeof __initial_auth_token !== 'undefined') {
+                    // カスタムトークンでサインイン
+                    try {
+                        const result = await signInWithCustomToken(auth, __initial_auth_token);
+                        userId = result.user.uid;
+                    } catch (error) {
+                        console.error("Custom token sign-in failed, signing in anonymously.", error);
+                        await signInAnonymously(auth);
+                        userId = auth.currentUser.uid;
+                    }
+                } else {
+                    // 匿名サインイン
+                    await signInAnonymously(auth);
+                    userId = auth.currentUser.uid;
+                }
+                
+                isAuthReady = true;
+                console.log("Firebase Auth Ready. User ID:", userId);
+                document.getElementById('user-id-display').textContent = `User ID: ${userId}`;
+                
+                // 認証完了後、初期ページのレンダリングを続行
+                window.dispatchEvent(new Event('auth-ready'));
+            });
+        } else {
+            console.error("Firebase config is missing.");
+            // 認証なしでSPAを起動 (ただしFirestoreは使えない)
+            isAuthReady = true;
+            window.dispatchEvent(new Event('auth-ready'));
+        }
+
+
+        // Canvas描画のためのグローバル変数 (既存のSPAスコープからこちらへ移動)
+        let canvas, ctx;
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let lineColor = '#d97706'; 
+        let lineWidth = 5;
+        let saveTimeout = null;
+        let drawingData = null; // Base64データを保持
+
+        // ページコンテンツのテンプレート
+        const pages = {
+            home: `
+                <div class="ds-container w-full max-w-4xl p-10 mt-10 rounded-lg text-center">
+                    <h1 class="text-6xl font-extrabold text-amber-500 tracking-wider mb-6 uppercase">
+                        Welcome, Ashen One.
+                    </h1>
+                    <h2 class="text-2xl text-gray-400 mb-8 font-serif italic">
+                        名もなき者よ、ようこそ。この地は、私の成し遂げた偉業の記録。
+                    </h2>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        古き誓約の記録を閲覧するには「誓約」、闇に魅入られた戦場を辿るには「遺物」、そして失われた記憶を呼び覚ますには「古文書」を選べ。
+                        <br class="my-4">
+                        
+                    </p>
+                    <button onclick="window.changePage('profile')" class="mt-8 ds-button text-lg bg-gray-800 text-amber-500 py-3 px-8 rounded-md uppercase font-bold tracking-widest">
+                        旅を始める
+                    </button>
+                </div>
+            `,
+            profile: `
+                <div class="ds-container w-full max-w-4xl p-10 mt-10 rounded-lg">
+                    <h1 class="text-4xl font-bold text-red-600 mb-8 border-b-2 border-gray-700 pb-3 uppercase">
+                        誓約 - 古き誓約の記録
+                    </h1>
+                    
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <!-- 基本情報 (ステータス) -->
+                        <div>
+                            <h2 class="text-2xl font-bold text-amber-500 mb-4">基本情報 (Status)</h2>
+                            <dl class="space-y-3 text-left">
+                                <div class="flex justify-between border-b border-gray-800 pb-1">
+                                    <dt class="text-gray-400">名前 / 呼び名:</dt>
+                                    <dd class="font-semibold text-gray-200">YurufuwaCider / てん</dd>
+                                </div>
+                                <div class="flex justify-between border-b border-gray-800 pb-1">
+                                    <dt class="text-gray-400">素性 / Class:</dt>
+                                    <dd class="font-semibold text-gray-200">ゲーマー</dd>
+                                </div>
+                                <div class="flex justify-between border-b border-gray-800 pb-1">
+                                    <dt class="text-gray-400">レベル / Soul Level:</dt>
+                                    <dd class="font-semibold text-gray-200">Lv. ??? (常に成長中)</dd>
+                                </div>
+                                <div class="flex justify-between border-b border-gray-800 pb-1">
+                                    <dt class="text-gray-400">得意な力 / Key Skill:</dt>
+                                    <dd class="font-semibold text-green-400">元RTAプレイヤー　(DarkSouls)</dd>
+                                </div>
+                            </dl>
+                        </div>
+
+                        <!-- ネットワークID (オンラインプレイ) -->
+                        <div>
+                            <h2 class="text-2xl font-bold text-amber-500 mb-4">オンラインプレイ</h2>
+                            <div class="space-y-4">
+                                <!-- Discord -->
+                                <div class="bg-zinc-800 p-4 rounded-md border border-gray-700 flex items-center shadow-lg">
+                                    <span class="text-3xl mr-4 icon-flame">&#x2717;</span> <!-- Custom Cross Icon -->
+                                    <div>
+                                        <p class="text-gray-400 text-sm">Discord ID (誓約の合図)</p>
+                                        <p class="text-xl font-mono text-gray-100 break-all">no.ten</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Steam -->
+                                <div class="bg-zinc-800 p-4 rounded-md border border-gray-700 flex items-center shadow-lg">
+                                    <span class="text-3xl mr-4 icon-flame">&#x2717;</span> <!-- Custom Cross Icon -->
+                                    <div>
+                                        <p class="text-gray-400 text-sm">Steam Profile (異世界の旅人)</p>
+                                        <p class="text-xl font-mono text-gray-100 break-all">YurufuwaCider</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- YouTube (古文書庫) -->
+                                <div class="bg-zinc-800 p-4 rounded-md border border-gray-700 flex items-center shadow-lg">
+                                    <span class="text-3xl mr-4 icon-flame">&#x2717;</span> <!-- Custom Cross Icon -->
+                                    <div>
+                                        <p class="text-gray-400 text-sm">Youtube (古文書庫)</p>
+                                        <p class="text-xl font-mono text-gray-100 break-all">@kibun_shidai</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="mt-8 text-center text-gray-500 italic">
+                        「...火の消えかけた灰よ、お前はもう用済みだ」 - 賢者
+                    </p>
+                </div>
+            `,
+            works: `
+                <div class="ds-container w-full max-w-6xl p-10 mt-10 rounded-lg">
+                    <h1 class="text-4xl font-bold text-red-600 mb-10 border-b-2 border-gray-700 pb-3 uppercase text-center">
+                        遺物 - 闇に魅入られた戦場
+                    </h1>
+                    
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- 作品カード 1 -->
+                        <div class="bg-zinc-800 p-6 rounded-lg border-2 border-gray-700 hover:border-amber-600 transition-all duration-300 shadow-xl">
+                            <h3 class="text-xl font-bold text-amber-500 mb-2 uppercase">Counter-Strike2</h3>
+                            <p class="text-sm text-gray-400 mb-4">[FPS]</p>
+                            <p class="text-gray-300 text-sm">
+                                この地に光はもはや無い。
+我が剣も、信仰も、屍の群れには届かぬ。
+ならば我は、逃げる。生の残滓を掴むために――
+                                (ZombiEscape)
+                            </p>
+                            
+                        </div>
+
+                        <!-- 作品カード 2 -->
+                        <div class="bg-zinc-800 p-6 rounded-lg border-2 border-gray-700 hover:border-amber-600 transition-all duration-300 shadow-xl">
+                            <h3 class="text-xl font-bold text-amber-500 mb-2 uppercase">DarkSouls</h3>
+                            <p class="text-sm text-gray-400 mb-4">[ActionRPG]</p>
+                            <p class="text-gray-300 text-sm">
+                                かつて時を駆ける者であった。
+誰よりも速く、死と絶望の迷宮を踏破せし者――
+だが今、その足は止まり、ただ灰の風に身を委ねるのみ。
+                                (any％黒騎士の斧槍ルート 46:32)
+                            </p>
+                            
+                        </div>
+
+                        <!-- 作品カード 3 -->
+                        <div class="bg-zinc-800 p-6 rounded-lg border-2 border-gray-700 hover:border-amber-600 transition-all duration-300 shadow-xl">
+                            <h3 class="text-xl font-bold text-amber-500 mb-2 uppercase">skate.</h3>
+                            <p class="text-sm text-gray-400 mb-4">[Action]</p>
+                            <p class="text-gray-300 text-sm">
+                                板に呪を宿し、重力を裏切る者たちが現れた。
+彼らは「滑走者」――
+転倒すれば骨が砕け、転生すればまた滑る。
+死を恐れぬ狂信者たちは、瓦礫と絶望の街を駆け、
+瞬間の“自由”を追い求める。
+                            </p>
+                            
+                        </div>
+                    </div>
+
+                    <div class="mt-12 text-center">
+                        <p class="text-gray-500 italic">
+                            この偉業は、まだ見ぬ世界への導きの光となる。
+                        </p>
+                    </div>
+                </div>
+            `,
+            manuscript: `
+                <div class="ds-container w-full max-w-4xl p-10 mt-10 rounded-lg">
+                    <h1 class="text-4xl font-bold text-amber-500 mb-6 border-b-2 border-gray-700 pb-3 uppercase text-center">
+                        古文書 - 失われた記憶の断片
+                    </h1>
+                    <p class="text-sm text-gray-400 mb-6 text-center">
+                        この古文書に、あなたの記憶の断片を描き残せ。描いた内容は自動で永続保存されます。
+                    </p>
+                    
+                    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 mb-4 justify-center items-center">
+                        <label for="color-picker" class="text-gray-400 font-semibold">筆の色:</label>
+                        <input type="color" id="color-picker" value="#d97706" class="rounded border-2 border-gray-700 h-8 w-12">
+                        
+                        <label for="line-width" class="text-gray-400 font-semibold">筆の太さ:</label>
+                        <input type="range" id="line-width" min="1" max="50" value="5" class="w-24">
+                        <span id="width-display" class="text-amber-500 font-mono w-8 text-right">5</span>
+                        
+                        <button onclick="window.clearCanvas(true)" class="ds-button bg-red-800 text-gray-100 py-2 px-4 rounded-md uppercase font-bold text-sm tracking-wide hover:bg-red-900">
+                            記憶を消す (Clear)
+                        </button>
+                    </div>
+
+                    <canvas id="drawing-canvas" width="800" height="500" class="mx-auto rounded-lg shadow-2xl"></canvas>
+                    
+                    <p class="mt-6 text-center text-gray-500 italic text-sm" id="save-status">
+                        記憶は永続的に残されます。
+                    </p>
+                </div>
+            `,
+        };
+
+        // =======================================================
+        // FIREBASE / FIRESTORE 関連関数
+        // =======================================================
+
+        /**
+         * 描画データをFirestoreに保存する。
+         */
+        async function saveDrawingToFirestore() {
+            if (!isAuthReady || !userId || !canvas) return;
+            
+            try {
+                // キャンバスの内容をBase64形式で取得
+                const dataURL = canvas.toDataURL('image/png');
+                drawingData = dataURL; // グローバル変数も更新
+                
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/drawing_data/manuscript`);
+                await setDoc(docRef, { 
+                    dataURL: dataURL,
+                    timestamp: new Date().getTime()
+                });
+
+                const statusEl = document.getElementById('save-status');
+                if (statusEl) {
+                    statusEl.textContent = '記憶は永続的に残されます。 (保存完了)';
+                    statusEl.classList.remove('text-red-500');
+                    statusEl.classList.add('text-green-500');
+                    setTimeout(() => {
+                        statusEl.textContent = '記憶は永続的に残されます。';
+                        statusEl.classList.remove('text-green-500');
+                    }, 2000);
+                }
+                
+            } catch (e) {
+                console.error("Error saving document: ", e);
+                const statusEl = document.getElementById('save-status');
+                if (statusEl) {
+                    statusEl.textContent = '保存中にエラーが発生しました。';
+                    statusEl.classList.add('text-red-500');
+                }
+            }
+        }
+
+        /**
+         * Firestoreから描画データをロードする。
+         */
+        async function loadDrawingFromFirestore() {
+            if (!isAuthReady || !userId) return;
+
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/drawing_data/manuscript`);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.dataURL) {
+                        drawingData = data.dataURL;
+                        console.log("Drawing data loaded from Firestore.");
+                        return true;
+                    }
+                }
+                drawingData = null; // データがない場合
+                return false;
+            } catch (e) {
+                console.error("Error loading document: ", e);
+                drawingData = null;
+                return false;
+            }
+        }
+        
+        /**
+         * Firestoreから描画データを削除する (キャンバスクリア時)
+         */
+        async function deleteDrawingFromFirestore() {
+            if (!isAuthReady || !userId) return;
+            
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/drawing_data/manuscript`);
+                await deleteDoc(docRef);
+                console.log("Drawing data deleted from Firestore.");
+            } catch (e) {
+                console.error("Error deleting document: ", e);
+            }
+        }
+
+        // =======================================================
+        // CANVAS 描画ロジック
+        // =======================================================
+
+        /**
+         * 描画キャンバスをセットアップする
+         */
+        async function setupCanvas() {
+            canvas = document.getElementById('drawing-canvas');
+            if (!canvas) return; 
+
+            ctx = canvas.getContext('2d');
+            
+            // ロードが完了するのを待つ
+            await loadDrawingFromFirestore();
+
+            // Retina/高解像度ディスプレイ対応 & レスポンシブ対応
+            function resizeCanvas() {
+                const container = canvas.closest('.ds-container');
+                const containerWidth = container ? container.clientWidth - 80 : 800;
+                
+                const ratio = window.devicePixelRatio || 1;
+                canvas.width = containerWidth * ratio;
+                canvas.height = 500 * ratio; 
+                canvas.style.width = `${containerWidth}px`;
+                canvas.style.height = `500px`;
+                
+                ctx.scale(ratio, ratio);
+                
+                // 描画設定をリセット
+                ctx.strokeStyle = lineColor;
+                ctx.lineWidth = lineWidth;
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                
+                // リサイズ後、保存された描画内容をロード
+                loadDrawing();
+            }
+            
+            // 描画をグローバル変数からロードし、キャンバスに描画する関数
+            function loadDrawing() {
+                // 背景をクリアしてダークカラーにする
+                ctx.clearRect(0, 0, canvas.width, canvas.height); 
+                ctx.save();
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
+                ctx.restore();
+                
+                if (drawingData) {
+                    const img = new Image();
+                    img.onload = () => {
+                        // 描画をキャンバスにフィットさせる
+                        ctx.drawImage(img, 0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
+                    };
+                    img.src = drawingData;
+                }
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+
+            // 描画イベントリスナー
+            canvas.addEventListener('mousedown', (e) => startDrawing(e, false));
+            canvas.addEventListener('touchstart', (e) => startDrawing(e, true));
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            canvas.addEventListener('touchcancel', stopDrawing);
+            
+            // カラーピッカーと太さの制御
+            const colorPicker = document.getElementById('color-picker');
+            const lineWidthInput = document.getElementById('line-width');
+            const widthDisplay = document.getElementById('width-display');
+            
+            if (colorPicker) colorPicker.addEventListener('input', (e) => {
+                lineColor = e.target.value;
+                ctx.strokeStyle = lineColor;
+            });
+            
+            if (lineWidthInput) lineWidthInput.addEventListener('input', (e) => {
+                lineWidth = parseInt(e.target.value);
+                ctx.lineWidth = lineWidth;
+                if (widthDisplay) widthDisplay.textContent = lineWidth;
+            });
+        }
+        
+        /**
+         * 描画開始処理
+         */
+        function startDrawing(e, isTouch) {
+            isDrawing = true;
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+            [lastX, lastY] = getCanvasCoordinates(clientX, clientY);
+            e.preventDefault(); 
+        }
+
+        /**
+         * 描画終了処理 - 保存をトリガー
+         */
+        function stopDrawing() {
+            if (!isDrawing) return;
+            isDrawing = false;
+            // 描画終了時に即時保存
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveDrawingToFirestore();
+        }
+
+        /**
+         * 描画処理
+         */
+        function draw(e) {
+            if (!isDrawing) return;
+
+            const isTouch = e.type.includes('touch');
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+            const [currentX, currentY] = getCanvasCoordinates(clientX, clientY);
+
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(currentX, currentY);
+            ctx.stroke();
+            
+            [lastX, lastY] = [currentX, currentY];
+            e.preventDefault(); 
+            
+            // 描画中に間隔を空けて保存をスケジュール (頻繁なFirestore書き込みを防ぐ)
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveDrawingToFirestore, 1000); // 1秒ごとに保存を試みる
+        }
+        
+        /**
+         * 画面座標をキャンバス内の座標に変換する
+         */
+        function getCanvasCoordinates(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return [
+                (clientX - rect.left) * scaleX / (window.devicePixelRatio || 1),
+                (clientY - rect.top) * scaleY / (window.devicePixelRatio || 1)
+            ];
+        }
+
+        /**
+         * キャンバスをクリアし、Firestoreのデータを削除する
+         * @param {boolean} clearGlobalData - グローバルな描画データもクリアするかどうか
+         */
+        window.clearCanvas = function(clearGlobalData = true) {
+            if (!ctx) return;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+            
+            // 背景色を再設定
+            ctx.save();
+            ctx.fillStyle = '#1a1a1a'; 
+            ctx.fillRect(0, 0, canvas.width / (window.devicePixelRatio || 1), canvas.height / (window.devicePixelRatio || 1));
+            ctx.restore();
+
+            if (clearGlobalData) {
+                drawingData = null;
+                deleteDrawingFromFirestore(); // Firestoreから削除
+                console.log('記憶は完全に消滅し、Firestoreからも削除されました。');
+            }
+        }
+
+
+        // =======================================================
+        // SPA NAVIGATION
+        // =======================================================
+
+        const contentEl = document.getElementById('main-content');
+        const navEl = document.getElementById('nav-menu');
+        let currentPage = 'home';
+
+        /**
+         * ページ内容を切り替えて描画する
+         * @param {string} pageName - 描画するページのキー ('home', 'profile', 'works', 'manuscript')
+         */
+        function renderPage(pageName) {
+            // === [ページ遷移前に現在の描画を保存する] ===
+            if (currentPage === 'manuscript' && canvas) {
+                // ページ離脱時に強制保存
+                if (saveTimeout) clearTimeout(saveTimeout);
+                saveDrawingToFirestore();
+            }
+            // ===============================================
+
+            const template = pages[pageName];
+            if (template) {
+                contentEl.style.opacity = '0';
+                setTimeout(() => {
+                    contentEl.innerHTML = template;
+                    updateActiveNav(pageName);
+                    currentPage = pageName;
+                    
+                    // 「古文書」ページの場合のみキャンバスをセットアップ
+                    if (pageName === 'manuscript' && isAuthReady) {
+                        setupCanvas(); // 認証完了後にのみセットアップ
+                    }
+                    
+                    contentEl.style.opacity = '1';
+                }, 300); 
+
+                window.location.hash = pageName;
+            }
+        }
+
+        /**
+         * アクティブなナビゲーションボタンを更新する
+         */
+        function updateActiveNav(activePage) {
+            document.querySelectorAll('.nav-btn').forEach(button => {
+                const isSelected = button.getAttribute('data-page') === activePage;
+                
+                if (isSelected) {
+                    button.classList.add('text-amber-500', 'border-b-2', 'border-red-600');
+                    button.classList.remove('text-gray-200');
+                } else {
+                    button.classList.remove('text-amber-500', 'border-b-2', 'border-red-600');
+                    button.classList.add('text-gray-200');
+                }
+            });
+        }
+
+        /**
+         * 外部からページ切り替えを呼び出すための関数をwindowスコープに公開
+         */
+        window.changePage = function(pageName) {
+            renderPage(pageName);
+        }
+
+        // ナビゲーションメニューにイベントリスナーを設定
+        navEl.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.classList.contains('nav-btn')) {
+                const pageName = target.getAttribute('data-page');
+                window.changePage(pageName);
+            }
+        });
+
+        // ページロード時の初期化処理
+        function startPortfolioApp() {
+            const hash = window.location.hash.substring(1);
+            const initialPage = pages[hash] ? hash : 'home';
+            renderPage(initialPage);
+        }
+        
+        // 認証完了を待ってアプリを初期化
+        if (isAuthReady) {
+             startPortfolioApp();
+        } else {
+            window.addEventListener('auth-ready', startPortfolioApp);
+        }
+
+        // URLハッシュが変わったときの処理 (ブラウザの戻る/進むボタン対応)
+        window.addEventListener('hashchange', () => {
+            const hash = window.location.hash.substring(1);
+            if (pages[hash] && hash !== currentPage) {
+                window.changePage(hash);
+            }
+        });
+
+    </script>
+</body>
+</html>
