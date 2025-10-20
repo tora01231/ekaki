@@ -96,15 +96,21 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // グローバル変数の定義
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        // =======================================================
+        // GitHub Pages/ローカル実行対応のためのグローバル変数定義
+        // =======================================================
 
-        // Firebase初期化
+        // Canvasグローバル変数を安全に取得し、ない場合はデフォルト値を設定
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'github-portfolio-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Firebase初期化に必要な変数
         let app, db, auth;
         let userId = null;
         let isAuthReady = false;
         
+        // Firebase設定が存在する場合のみ初期化を実行
         if (Object.keys(firebaseConfig).length > 0) {
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
@@ -114,10 +120,10 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     userId = user.uid;
-                } else if (typeof __initial_auth_token !== 'undefined') {
-                    // カスタムトークンでサインイン
+                } else if (initialAuthToken) {
+                    // カスタムトークンがある場合、Canvas環境でのサインインを試みる
                     try {
-                        const result = await signInWithCustomToken(auth, __initial_auth_token);
+                        const result = await signInWithCustomToken(auth, initialAuthToken);
                         userId = result.user.uid;
                     } catch (error) {
                         console.error("Custom token sign-in failed, signing in anonymously.", error);
@@ -125,7 +131,7 @@
                         userId = auth.currentUser.uid;
                     }
                 } else {
-                    // 匿名サインイン
+                    // GitHub/ローカル環境など、トークンがない場合は匿名サインイン
                     await signInAnonymously(auth);
                     userId = auth.currentUser.uid;
                 }
@@ -138,9 +144,12 @@
                 window.dispatchEvent(new Event('auth-ready'));
             });
         } else {
-            console.error("Firebase config is missing.");
-            // 認証なしでSPAを起動 (ただしFirestoreは使えない)
+            // Firebase設定がない場合の警告と静的モードでの動作
+            console.warn("GitHub Pages/ローカル実行モード: Firebase設定が存在しないため、データの永続化機能（古文書）は無効です。Firestoreを使用するには、`firebaseConfig`オブジェクトを実際の値で定義してください。");
+            
+            // 静的モードとして動作させる
             isAuthReady = true;
+            document.getElementById('user-id-display').textContent = `User ID: STATIC_MODE`;
             window.dispatchEvent(new Event('auth-ready'));
         }
 
@@ -338,13 +347,15 @@
          * 描画データをFirestoreに保存する。
          */
         async function saveDrawingToFirestore() {
-            if (!isAuthReady || !userId || !canvas) return;
+            // Firebaseが初期化されていない場合は処理をスキップ
+            if (!isAuthReady || !userId || !canvas || !db) return;
             
             try {
                 // キャンバスの内容をBase64形式で取得
                 const dataURL = canvas.toDataURL('image/png');
                 drawingData = dataURL; // グローバル変数も更新
                 
+                // FirestoreのパスをアプリIDとユーザーIDに基づいて構築
                 const docRef = doc(db, `artifacts/${appId}/users/${userId}/drawing_data/manuscript`);
                 await setDoc(docRef, { 
                     dataURL: dataURL,
@@ -376,7 +387,8 @@
          * Firestoreから描画データをロードする。
          */
         async function loadDrawingFromFirestore() {
-            if (!isAuthReady || !userId) return;
+            // Firebaseが初期化されていない場合は処理をスキップ
+            if (!isAuthReady || !userId || !db) return;
 
             try {
                 const docRef = doc(db, `artifacts/${appId}/users/${userId}/drawing_data/manuscript`);
@@ -403,7 +415,8 @@
          * Firestoreから描画データを削除する (キャンバスクリア時)
          */
         async function deleteDrawingFromFirestore() {
-            if (!isAuthReady || !userId) return;
+            // Firebaseが初期化されていない場合は処理をスキップ
+            if (!isAuthReady || !userId || !db) return;
             
             try {
                 const docRef = doc(db, `artifacts/${appId}/users/${userId}/drawing_data/manuscript`);
@@ -415,7 +428,7 @@
         }
 
         // =======================================================
-        // CANVAS 描画ロジック
+        // CANVAS 描画ロジック (変更なし)
         // =======================================================
 
         /**
@@ -433,6 +446,7 @@
             // Retina/高解像度ディスプレイ対応 & レスポンシブ対応
             function resizeCanvas() {
                 const container = canvas.closest('.ds-container');
+                // コンテナの幅からパディングを引いた値を算出
                 const containerWidth = container ? container.clientWidth - 80 : 800;
                 
                 const ratio = window.devicePixelRatio || 1;
@@ -441,6 +455,7 @@
                 canvas.style.width = `${containerWidth}px`;
                 canvas.style.height = `500px`;
                 
+                // 描画コンテキストをスケーリング
                 ctx.scale(ratio, ratio);
                 
                 // 描画設定をリセット
@@ -580,14 +595,19 @@
 
             if (clearGlobalData) {
                 drawingData = null;
-                deleteDrawingFromFirestore(); // Firestoreから削除
-                console.log('記憶は完全に消滅し、Firestoreからも削除されました。');
+                // Firestoreが初期化されている場合のみ削除を試みる
+                if (db) {
+                    deleteDrawingFromFirestore(); // Firestoreから削除
+                    console.log('記憶は完全に消滅し、Firestoreからも削除されました。');
+                } else {
+                    console.log('記憶はローカルで消去されました。Firestoreは未設定です。');
+                }
             }
         }
 
 
         // =======================================================
-        // SPA NAVIGATION
+        // SPA NAVIGATION (変更なし)
         // =======================================================
 
         const contentEl = document.getElementById('main-content');
